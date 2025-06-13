@@ -28,6 +28,17 @@ const CampgroundSchema = new Schema({
             ref: 'Review',
         }
     ],
+    geometry: {
+        type: {
+            String,
+            enum: ['Point'],
+            required: true
+        },
+        coordinates: {
+            type: [Number],
+            required: true
+        }
+    }
 });
 
 // campgroundに結び付いているレビューを削除するためのミドルウェア
