@@ -38,7 +38,7 @@
                     </li>
                     <li class="list-group-item">登録者 : <%= campground.author.username %>
                     </li>
-                    <li class="list-group-item">￥<%= campground.price %>/拍</li>
+                    <li class="list-group-item">￥<%= campground.price %>/泊</li>
                 </ul>
                 <% if(currentUser && campground.author.equals( currentUser._id)) { %>
                     <div class="card-body">
@@ -48,9 +48,6 @@
                         </form>
                     </div>
                     <% } %>
-                        <div class="card-footer text-muted">
-                            2 days ago
-                        </div>
             </div>
         </div>
         <div class="col-6">
