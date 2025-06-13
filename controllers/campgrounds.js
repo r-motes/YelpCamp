@@ -12,7 +12,7 @@ async function geocodeCampgroundAddress(address) {
             const { lat, lon } = response.data[0];
             return { lat: parseFloat(lat), lng: parseFloat(lon) };
         } else {
-            throw new ExpressError(400, '住所が見つかりませんでした');
+            throw new ExpressError('住所が見つかりませんでした', 400);
         }
     } catch (error) {
         console.error('ジオコーディングエラー:', error);
@@ -51,7 +51,7 @@ module.exports.createCampground = async (req, res) => {
     campground.images = req.files.map(f => ({url: f.path, filename: f.filename}));
     campground.author = req.user._id;
     // 新規登録時にgeocodeを取得し、データベースにGeoJSONで保存しておく。
-    const geocode = await geocodeCampgroundAddress(campground.location);
+    const geocode = req.body.geocode; // ミドルウェアで取得したgeocodeを使用
     const GeoJson = {
         type: 'Point',
         coordinates: [geocode.lng, geocode.lat] // OpenStreetMapの座標は[経度, 緯度]の順
@@ -79,7 +79,7 @@ module.exports.updateCampground = async (req, res) => {
     const campground = await Campground.findByIdAndUpdate(id, { ...req.body.campground}, {new: true});
     const imgs = req.files.map(f => ({url: f.path, filename: f.filename}));
     campground.images.push(...imgs);
-    const geocode = await geocodeCampgroundAddress(campground.location);
+    const geocode = req.body.geocode; 
     campground.geometry = {
         type: 'Point',
         coordinates: [geocode.lng, geocode.lat] // OpenStreetMapの座標は[経度, 緯度]の順

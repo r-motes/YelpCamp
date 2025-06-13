@@ -2,6 +2,7 @@ const ExpressError = require('./utils/ExpressError');
 const { campgroundSchema, reviewSchema } = require('./schemas');
 const Campground = require('./models/campground');
 const Review = require('./models/review');
+const axios = require('axios');
 
 
 module.exports.isLoggedIn = (req, res, next) => {
@@ -26,6 +27,23 @@ module.exports.validateCampground = (req, res, next) => {
         const msg = error.details.map(detail => detail.message).join(',');
         throw new ExpressError(msg, 400);
     }else {
+        next();
+    }
+}
+
+module.exports.validateAddress = async(req, res, next) => {
+    const address = req.body.campground.location;
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`;
+    const response = await axios.get(url);
+    if (response.data.length === 0) {
+        req.flash('error', '住所が検索できませんでした');
+        if(req.params.id) {
+            return res.redirect(`/campgrounds/${req.params.id}/edit`);
+        }
+        return res.redirect(`/campgrounds/new`);
+    }else {
+        const { lat, lon } = response.data[0];
+        req.body.geocode = { lat: parseFloat(lat), lng: parseFloat(lon) }; // 緯度・経度を保存
         next();
     }
 }
