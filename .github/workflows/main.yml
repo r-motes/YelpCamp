@@ -1,0 +1,26 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main  # mainブランチにpushされたときに発動
+
+jobs:
+  deploy:
+    name: SSH Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/ubuntu/repos/YelpCamp
+            git pull origin main
+            npm install
+            systemctl restart apache2
+            pm2 stop app.js
+            pm2 start app.js
